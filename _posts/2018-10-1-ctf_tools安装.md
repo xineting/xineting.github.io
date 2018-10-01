@@ -4,7 +4,7 @@ title:      安装ctf-tools
 subtitle:   安装ctf-tools
 date:       2018-10-1
 author:     XT
-header-img: img/avatar_m.jpg
+header-img: img/post-bg-map.jpg
 catalog: 	 true
 tags:
     - Pwn环境
