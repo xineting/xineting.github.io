@@ -23,3 +23,19 @@ tags:
 5../install
 ```
 
+## Docker
+
+应广大用户要求，Dockerfile已经被列入其中。你可以build一个docker镜像：
+
+```
+git clone https://github.com/zardus/ctf-tools
+docker build -t ctf-tools .
+```
+
+运行：
+
+```
+docker run -it ctf-tools
+```
+
+这个镜像里面包含了一些ctf工具并且可以运行，但是你可能还是需要安装这些工具。
