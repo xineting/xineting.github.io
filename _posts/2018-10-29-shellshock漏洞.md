@@ -13,5 +13,5 @@ tags:
 
 > CVE-2014-6271
 
-![1540745407562](../img/1540745407562.png)
+![1540745407562](https://raw.githubusercontent.com/xineting/xineting.github.io/master/img/1540745407562.png)
 
