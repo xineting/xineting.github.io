@@ -1,7 +1,7 @@
 ---
 layout:     post
-title:      checksec的保护机制
-subtitle:   checksec的保护机制
+title:      linux内存的保护机制
+subtitle:   linux内存的保护机制
 date:       2018-10-1
 author:     XT
 header-img: img/post-bg-map.jpg
@@ -13,7 +13,7 @@ tags:
 
 >checksec的保护机制
 
-# checksec的保护机制
+# linux内存的保护机制
 
 
 
