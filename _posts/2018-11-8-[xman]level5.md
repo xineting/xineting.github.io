@@ -28,7 +28,7 @@ int mprotect(const void *start, size_t len, int prot)
 
 **mprotect()函数把自start开始的、长度为len的内存区的保护属性修改为prot指定的值。** 
 
-![1541645784475](F:\xineting.github.io\img\1541645784475.png)
+![1541645784475](https://raw.githubusercontent.com/xineting/xineting.github.io/master/img/1541645784475.png)
 
 可见打开了nx保护
 
@@ -36,7 +36,7 @@ int mprotect(const void *start, size_t len, int prot)
 
 程序执行后，vmmap查看data段的地址
 
-![1541645937742](F:\xineting.github.io\img\1541645937742.png)
+![1541645937742](https://raw.githubusercontent.com/xineting/xineting.github.io/master/img/1541645937742.png)
 
 看到地址为***0x600000-0x601000***
 
@@ -82,7 +82,7 @@ mprotect的第一个参数标识要写的内存页的首地址。这里是以页
 
 我们这个elf文件中并没有pop rbx的gadget
 
-![1541646188733](F:\xineting.github.io\img\1541646188733.png)
+![1541646188733](https://raw.githubusercontent.com/xineting/xineting.github.io/master/img/1541646188733.png)
 
 只能控制rdi，rsi，r15.
 
