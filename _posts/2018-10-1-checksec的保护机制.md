@@ -1,6 +1,6 @@
 ---
 layout:     post
-title:      linux内存的保护机制
+title:      linux内存的保护机制及应对
 subtitle:   linux内存的保护机制
 date:       2018-10-1
 author:     XT
@@ -13,7 +13,7 @@ tags:
 
 >checksec的保护机制
 
-# linux内存的保护机制
+# linux内存的保护机制及应对
 
 
 
@@ -67,121 +67,90 @@ gcc -fstack-protector -o test test.c   //启用堆栈保护，不过只为局部
 
 gcc -fstack-protector-all -o test test.c //启用堆栈保护，为所有函数插入保护代码
 
-**三、FORTIFY**
 
-这个保护机制查了很久都没有个很好的汉语形容，根据我的理解它其实和栈保护都是gcc的新的为了增强保护的一种机制，防止缓冲区溢出攻击。由于并不是太常见，也没有太多的了解。
 
-举个例子可能简单明了一些：
+```
+RELRO：RELRO会有Partial RELRO和FULL RELRO，如果开启FULL RELRO，意味着我们无法修改got表
 
-一段简单的存在缓冲区溢出的C代码
+Stack：如果栈中开启Canary found，那么就不能用直接用溢出的方法覆盖栈中返回地址，而且要通过改写指针与局部变量、leak canary、overwrite canary的方法来绕过
 
-void fun(char *s) {
+NX：NX enabled如果这个保护开启就是意味着栈中数据没有执行权限，以前的经常用的call esp或者jmp esp的方法就不能使用，但是可以利用rop这种方法绕过
 
-​        char buf[0x100];
+PIE：PIE enabled如果程序开启这个地址随机化选项就意味着程序每次运行的时候地址都会变化，而如果没有开PIE的话那么No PIE (0x400000)，括号内的数据就是程序的基地址 
 
-​        strcpy(buf, s);
+FORTIFY：FORTIFY_SOURCE机制对格式化字符串有两个限制
+(1)包含%n的格式化字符串不能位于程序内存中的可写地址。
+(2)当使用位置参数时，必须使用范围内的所有参数。所以如果要使用%7$x，你必须同时使用1,2,3,4,5和6。
 
-​        /* Don't allow gcc to optimise away the buf */
+```
 
-​        asm volatile("" :: "m" (buf));
 
-}
 
-用包含参数-U_FORTIFY_SOURCE编译
+**0x03 **泄露ibc地址和版本的方法**
 
-08048450 :
+【1】利用格式化字符串漏洞泄露栈中的数据，从而找到libc的某个函数地址，再利用libc-database来判断远程libc的版本，之后再计算出libc的基址，一般做题我喜欢找__libc_start_main的地址
 
-  push   %ebp               ;
+【2】利用write这个函数，pwntools有个很好用的函数DynELF去利用这个函数计算出程序的各种地址，包括函数的基地址，libc的基地址，libc中system的地址
 
-  mov    %esp,%ebp
+【3】利用printf函数，printf函数输出的时候遇到0x00时候会停止输出，如果输入的时候没有在最后的字节处填充0x00，那么输出的时候就可能泄露栈中的重要数据，比如libc的某个函数地址
 
-  sub    $0x118,%esp        ; 将0x118存储到栈上
+**0x05** **简单的栈溢出**
 
-  mov    0x8(%ebp),%eax     ; 将目标参数载入eax
+程序没有开启任何保护:
 
-  mov    %eax,0x4(%esp)     ; 保存目标参数
+方法一：传统的教材思路是把shellcode写入栈中，然后查找程序中或者libc中有没有call esp或者jmp esp，比如这个题目：<http://blog.csdn.net/niexinming/article/details/76893510>
 
-  lea    -0x108(%ebp),%eax  ; 数组buf
+方法二：但是现代操作系统中libc中会开启地址随机化，所以先寻找程序中system的函数，再布局栈空间，调用gets(.bss)，最后调用system('/bin/sh') 比如这个题目：<http://blog.csdn.net/niexinming/article/details/78796408>
 
-  mov    %eax,(%esp)        ; 保存
+方法三：覆盖虚表方式利用栈溢出漏洞，这个方法是m4x师傅教我的方法，我觉得很巧妙，比如这个题目：<http://blog.csdn.net/niexinming/article/details/78144301>
 
-  call   8048320
+**0x06** **开启nx的程序**
 
-  leave                     ;
+开启nx之后栈和bss段就只有读写权限，没有执行权限了，所以就要用到rop这种方法拿到系统权限，如果程序很复杂，或者程序用的是静态编译的话，那么就可以使用ROPgadget这个工具很方便的直接生成rop利用链。有时候好多程序不能直接用ROPgadget这个工具直接找到利用链，所以就要手动分析程序来getshell了，比如这两个题目： <http://blog.csdn.net/niexinming/article/details/78259866>
 
-  ret
+**0x07** **开启** **canary** **的程序**
 
-用包含参数-D_FORTIFY_SOURCE=2编译
+开启canary后就不能直接使用普通的溢出方法来覆盖栈中的函数返回地址了，要用一些巧妙的方法来绕过或者利canary本身的弱点来攻击
 
-08048470 :
+【1】利用canary泄露flag，这个方法很巧妙的运用了canary本身的弱点，当__stack_check_fail时，会打印出正在运行中程序的名称，所以，我们只要将__libc_argv[0]覆盖为flag的地址就能将flag打印出来，比如这个题目： <http://blog.csdn.net/niexinming/article/details/78522682>
 
-  push   %ebp               ;
+【2】利用printf函数泄露一个子进程的Canary，再在另一个子进程栈中伪造Canary就可以绕过Canary的保护了，比如这个题目：<http://blog.csdn.net/niexinming/article/details/78681846>
 
-  mov    %esp,%ebp
+**0x08** **开启****PIE****的程序**
 
-  sub    $0x118,%esp        ;
+【1】利用printf函数尽量多打印一些栈中的数据，根据泄露的地址来计算程序基地址，libc基地址，system地址，比如这篇文章中echo2的wp： <http://blog.csdn.net/niexinming/article/details/78512274>
 
-  movl   $0x100,0x8(%esp)   ; 把0x100当作目标参数保存
+【2】利用write泄露程序的关键信息，这样的话可以很方便的用DynELF这个函数了，比如这个文章中的rsbo2的题解：<http://blog.csdn.net/niexinming/article/details/78620566>
 
-  mov    0x8(%ebp),%eax     ;
+**0x09** **全部保护开启**
 
-  mov    %eax,0x4(%esp)     ;
+如果程序的栈可以被完全控制，那么程序的保护全打开也会被攻破，比如这个题目：<http://blog.csdn.net/niexinming/article/details/78666941>
 
-  lea    -0x108(%ebp),%eax  ;
+**0x0a** **格式化字符串漏洞**
 
-  mov    %eax,(%esp)        ;
+格式化漏洞现在很难在成熟的软件中遇到，但是这个漏洞却很有趣
 
-  call   8048370 <__strcpy_chk@plt>
+【1】pwntools有很不错的函数FmtStr和fmtstr_payload来自动计算格式化漏洞的利用点，并且自动生成payload，比如这个题目：<http://blog.csdn.net/niexinming/article/details/78699413> 和 <http://blog.csdn.net/niexinming/article/details/78512274> 中echo的题解
 
-  leave                      ;
+【2】格式化漏洞也是信息泄露的好伴侣，比如这个题目中制造格式化字符串漏洞泄露各种数据 <http://blog.csdn.net/niexinming/article/details/78768850>
 
-  ret
+**0x0b uaf****漏洞**
 
-我们可以看到gcc生成了一些附加代码，通过对数组大小的判断替换strcpy, memcpy, memset等函数名，达到防止缓冲区溢出的作用。
+如果把堆释放之后，没有把指针指针清0，还让指针保存下来，那么就会引发很多问题，比如这个题目 <http://blog.csdn.net/niexinming/article/details/78598635>
 
-**四、NX（DEP）**
+**0x0c** **任意位置写**
 
-NX即No-eXecute（不可执行）的意思，NX（DEP）的基本原理是将数据所在内存页标识为不可执行，当程序溢出成功转入shellcode时，程序会尝试在数据页面上执行指令，此时CPU就会抛出异常，而不是去执行恶意指令。
+如果程序可以在内存中的任意位置写的话，那么威力绝对很大
 
-工作原理如图：
+【1】虽然只能写一个字节，但是依然可以控制程序的并getshell，比如这个题目 <http://blog.csdn.net/niexinming/article/details/78542089>
 
-![img](https://upload-images.jianshu.io/upload_images/1731834-9fd297e93278f44d.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/577/format/webp)
+【2】修改got表是个控制程序流程的好办法，很多ctf题目只要能通过各种方法控制got的写入，就可以最终得到胜利，比如这个题目： <http://blog.csdn.net/niexinming/article/details/78542089>
 
-gcc编译器默认开启了NX选项，如果需要关闭NX选项，可以给gcc编译器添加-z execstack参数。
-
-例如：
-
-gcc -z execstack -o test test.c
-
-在Windows下，类似的概念为DEP（数据执行保护），在最新版的Visual Studio中默认开启了DEP编译选项。
-
-**五、PIE（ASLR）**
-
-一般情况下NX（Windows平台上称其为DEP）和地址空间分布随机化（ASLR）会同时工作。
-
-内存地址随机化机制（address space layout randomization)，有以下三种情况
-
-0 - 表示关闭进程地址空间随机化。
-
-1 - 表示将mmap的基址，stack和vdso页面随机化。
-
-2 - 表示在1的基础上增加栈（heap）的随机化。
-
-可以防范基于Ret2libc方式的针对DEP的攻击。ASLR和DEP配合使用，能有效阻止攻击者在堆栈上运行恶意代码。
-
-Built as PIE：位置独立的可执行区域（position-independent executables）。这样使得在利用缓冲溢出和移动操作系统中存在的其他内存崩溃缺陷时采用面向返回的编程（return-oriented programming）方法变得难得多。
-
-liunx下关闭PIE的命令如下：
-
-sudo -s echo 0 > /proc/sys/kernel/randomize_va_space
-
-**六、RELRO**
-
-设置符号重定向表格为只读或在程序启动时就解析并绑定所有动态符号，从而减少对GOT（Global Offset Table）攻击。RELRO为” Partial RELRO”，说明我们对GOT表具有写权限。
+【3】如果能计算出libc的基地址的话，控制top_chunk指针也是解题的好方法，比如这个题目： <http://blog.csdn.net/niexinming/article/details/78759363>
 
  
 
- 
+
 
  
 
