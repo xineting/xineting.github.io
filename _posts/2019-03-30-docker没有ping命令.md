@@ -2,7 +2,7 @@
 layout:     post
 title:      docker添加ping
 subtitle:    docker添加ping
-date:       2018-10-4
+date:       2019-3-30
 author:     XT
 header-img: img/post-bg-coffee.jpeg
 catalog: 	 true
