@@ -22,4 +22,6 @@ apt-get update
 apt install net-tools       # ifconfig 
 
 apt install iputils-ping     # ping
+
+apt-get install iproute2 iproute2-doc
 ```
