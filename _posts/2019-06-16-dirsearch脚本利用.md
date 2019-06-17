@@ -72,5 +72,5 @@ cd dirsearch/
 
 ### Windows系统下的使用示例
 
-![1560741509147](C:\Users\wzx\AppData\Roaming\Typora\typora-user-images\1560741509147.png)
+![1560741509147](https://raw.githubusercontent.com/xineting/xineting.github.io/master/pic/1560741509147.png)
 
