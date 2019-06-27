@@ -7,8 +7,7 @@ author:     XT
 header-img: img/post-bg-coffee.jpeg
 catalog: 	 true
 tags:
-    - linux
-    - docker
+    - 运维
 ---
 
 
