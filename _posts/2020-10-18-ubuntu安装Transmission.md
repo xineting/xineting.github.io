@@ -50,7 +50,9 @@ sudo apt-get install transmission-daemon
 打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：
 
 ```json
+
 {
+    
     ......
 
     "rpc-authentication-required": true
