@@ -54,16 +54,27 @@ sudo apt-get install transmission-daemon
     ......
 
     "rpc-authentication-required": true
+    
     "rpc-bind-address": "0.0.0.0", 
+    
     "rpc-enabled": true, 
+    
     "rpc-password": "123456", 
+    
     "rpc-port": 9091,
-    "rpc-url": "/transmission/",
+    
+    "rpc-url": "/transmission/",    
+  
     "rpc-username": "transmission", 
+    
     "rpc-whitelist": "*", 
+    
     "rpc-whitelist-enabled": true,
+    
     ......
+    
 }
+
 ```
 
 我将用户名设置为了transmission，密码设置为了123456，whitelist设置成了”*”，表示任何IP都可以通过RPC协议访问这个daemon。
