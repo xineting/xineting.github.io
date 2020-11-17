@@ -47,12 +47,10 @@ sudo apt-get install transmission-daemon
 
 # 二、配置
 
-打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：1
+打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：2
 
 ```json
 {
-
-    ......
 
     "rpc-authentication-required": true
     
@@ -71,8 +69,6 @@ sudo apt-get install transmission-daemon
     "rpc-whitelist": "*", 
     
     "rpc-whitelist-enabled": true,
-    
-    ......
     
 }
 ```
