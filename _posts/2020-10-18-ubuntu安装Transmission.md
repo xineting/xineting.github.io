@@ -47,12 +47,11 @@ sudo apt-get install transmission-daemon
 
 # 二、配置
 
-打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：
+打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：1
 
 ```json
-
 {
-    
+
     ......
 
     "rpc-authentication-required": true
@@ -76,7 +75,6 @@ sudo apt-get install transmission-daemon
     ......
     
 }
-
 ```
 
 我将用户名设置为了transmission，密码设置为了123456，whitelist设置成了”*”，表示任何IP都可以通过RPC协议访问这个daemon。
@@ -90,7 +88,7 @@ service transmission-daemon start
 启动程序后，打开settings.json，会看到rpc-password一项被改为了HASH值。
 
 ```
-"rpc-password": "{5f4bd5498bddd9aa2ad8f4d475dcebe23e9d8c8bsorspnUE",  
+"rpc-password": "{5f4bd5498bddd9aa2ad8f4d475dcebe23e9d8c8bsorspnUE"}, 
 ```
 
 ## 配置其它参数
