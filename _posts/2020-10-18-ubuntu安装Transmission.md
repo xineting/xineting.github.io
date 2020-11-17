@@ -47,29 +47,19 @@ sudo apt-get install transmission-daemon
 
 # 二、配置
 
-打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：2
+打开文件/var/lib/transmission-daemon/info/settings.json，修改配置参数如下：
 
-```j
+```
 {
-
-    "rpc-authentication-required": true
-    
-    "rpc-bind-address": "0.0.0.0", 
-    
-    "rpc-enabled": true, 
-    
-    "rpc-password": "123456", 
-    
-    "rpc-port": 9091,
-    
-    "rpc-url": "/transmission/",    
-  
-    "rpc-username": "transmission", 
-    
-    "rpc-whitelist": "*", 
-    
-    "rpc-whitelist-enabled": true,
-    
+    "rpc-authentication-required": true 
+    "rpc-bind-address": "0.0.0.0",     
+    "rpc-enabled": true,     
+    "rpc-password": "123456",     
+    "rpc-port": 9091,    
+    "rpc-url": "/transmission/",     
+    "rpc-username": "transmission",     
+    "rpc-whitelist": "*",     
+    "rpc-whitelist-enabled": true,    
 }
 ```
 
