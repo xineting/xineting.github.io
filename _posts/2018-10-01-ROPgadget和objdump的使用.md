@@ -1,17 +1,39 @@
 ---
 layout:     post
-title:      objdump命令
-subtitle:    objdump命令
-date:       2018-10-04
+title:      ROPgadget和objdump
+subtitle:   ROPgadget objdump
+date:       2018-10-1
 author:     XT
-header-img: img/tag-bg-o.jpg
+header-img: img/post-bg-coffee.jpeg
 catalog: 	 true
 tags:
     - 安全
 ---
 
 
-> objdump命令
+>ROPgadget and objdump命令
+
+# 一、ROPgadget
+
+------
+
+```
+ROPgadget --binary b0verfl0w --only 'jmp|ret'
+查询包含的语句的地址
+➜  X-CTF Quals 2016 - b0verfl0w git:(iromise) ✗ ROPgadget --binary b0verfl0w --only 'jmp|ret'         
+Gadgets information
+============================================================
+0x08048504 : jmp esp
+0x0804836a : ret
+0x0804847e : ret 0xeac1
+
+Unique gadgets found: 3
+```
+
+
+
+# 二、objdump
+------
 
 **objdump -f test**
 
